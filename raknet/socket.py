@@ -3,7 +3,7 @@ import socket
 from abc import ABC
 from typing import Self, Optional
 
-from .utils import InternetAddress
+from .other import InternetAddress
 
 __all__ = [
     'ClientSocket',

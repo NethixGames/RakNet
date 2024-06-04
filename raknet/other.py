@@ -20,6 +20,9 @@ class InternetAddress(Final):
     def __str__(self) -> str:
         return f'{self.ip} {self.port}'
 
+    def __copy__(self) -> Self:
+        return InternetAddress(self.ip, self.port, self.version)
+
 
 class ProtocolAcceptor(Final):
     def __init__(self, version: int):
