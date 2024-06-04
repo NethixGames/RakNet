@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "raknet"
+version = "0.1.0"
+description = "RakNet server implementation written in Python (🐍)"
+authors = ["NethixGames <support@nethixgames.net>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+binary = { git = 'https://github.com/NethixGames/Binary.git', branch = 'stable' }
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
