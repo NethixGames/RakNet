@@ -2,8 +2,12 @@ import copy
 from typing import Self
 
 from .other import InternetAddress, MessageIdentifiers
-from .packet import Packet, OnlinePacket, OfflinePacket, PacketSerializer
+from .packet import Packet, OnlinePacket, OfflinePacket, AcknowledgePacket, PacketSerializer
 from .raknet import RakNet
+
+
+class ACK(AcknowledgePacket):
+    ID = 0xc0
 
 
 class AdvertiseSystem(Packet):
@@ -152,6 +156,10 @@ class IncompatibleProtocolVersion(OfflinePacket):
         self.protocol = __in.read_byte()
         self.read_magic(__in)
         self.server_id = __in.read_long()
+
+
+class NACK(AcknowledgePacket):
+    ID = 0xa0
 
 
 class NewIncomingConnection(OnlinePacket):

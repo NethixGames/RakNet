@@ -142,3 +142,75 @@ class OfflinePacket(Packet, ABC):
 
 class OnlinePacket(Packet, ABC):
     pass
+
+
+class AcknowledgePacket(Packet):
+    RECORD_TYPE_RANGE = 0x00
+    RECORD_TYPE_SINGLE = 0x01
+
+    packets: list[int] = []
+
+    def encode_payload(self, __out: PacketSerializer) -> None:
+        payload = BinaryStream()
+        self.packets.sort()
+
+        count = len(self.packets)
+        records = 0
+
+        if count > 0:
+            pointer = 1
+            start = self.packets[0]
+            last = self.packets[0]
+
+            while pointer < count:
+                current = self.packets[pointer]
+                pointer += 1
+
+                diff = current - last
+                if diff == 1:
+                    last = current
+                elif diff > 1:
+                    if start == last:
+                        payload.write_byte(self.RECORD_TYPE_SINGLE)
+                        payload.write_triad(start, order=ByteOrder.LITTLE_ENDIAN)
+                    else:
+                        payload.write_byte(self.RECORD_TYPE_RANGE)
+                        payload.write_triad(start, order=ByteOrder.LITTLE_ENDIAN)
+                        payload.write_triad(last, order=ByteOrder.LITTLE_ENDIAN)
+
+                    start = last = current
+                    records += 1
+
+            if start == last:
+                payload.write_byte(self.RECORD_TYPE_SINGLE)
+                payload.write_triad(start, order=ByteOrder.LITTLE_ENDIAN)
+            else:
+                payload.write_byte(self.RECORD_TYPE_RANGE)
+                payload.write_triad(start, order=ByteOrder.LITTLE_ENDIAN)
+                payload.write_triad(last, order=ByteOrder.LITTLE_ENDIAN)
+            records += 1
+
+        __out.write_short(records)
+        __out.write(payload.buffer)
+
+    def decode_payload(self, __in: PacketSerializer) -> None:
+        self.packets.clear()
+
+        records = __in.read_short()
+        count = 0
+
+        i = 0
+        while i < records and not __in.feos() and count < 4096:
+            if __in.read_byte() == self.RECORD_TYPE_SINGLE:
+                start = __in.read_triad(order=ByteOrder.LITTLE_ENDIAN)
+                end = __in.read_triad(order=ByteOrder.LITTLE_ENDIAN)
+                if (end - start) > 512:
+                    end = start + 512
+                for j in range(start, end + 1):
+                    self.packets[count] = j
+                    count += 1
+            else:
+                self.packets[count] = __in.read_triad(order=ByteOrder.LITTLE_ENDIAN)
+                count += 1
+            i += 1
+

@@ -1,3 +1,4 @@
+import time
 from typing import Final, Self
 
 __all__ = [
@@ -58,7 +59,7 @@ class DisconnectReason(Final):
         }.get(reason, f"Unknown reason {reason}")
 
 
-class MessageIdentifiers:
+class MessageIdentifiers(Final):
     ###
     # RESERVED TYPES - DO NOT CHANGE THESE
     # All types from RakPeer
@@ -109,3 +110,11 @@ class MessageIdentifiers:
     # RakPeer - Inform a remote system of our IP/Port. On the recipient, all data past ID_ADVERTISE_SYSTEM is whatever was passed to
     # the data parameter
     ADVERTISE_SYSTEM = 0x1d
+
+class ReliableCacheEntry(Final):
+    timestamp: float
+    packets: list
+
+    def __init__(self, packets: list):
+        self.packets = packets
+        self.timestamp = time.time()
