@@ -10,6 +10,7 @@ __all__ = [
     'Packet',
     'OnlinePacket',
     'OfflinePacket',
+    'AcknowledgePacket',
     'PacketReliability',
     'PacketSerializer'
 ]
